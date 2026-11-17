@@ -1,12 +1,6 @@
-FROM rust:1.80-slim AS builder
+FROM python:3.12-slim
 WORKDIR /app
-COPY . .
-RUN cargo build --release
-
-FROM debian:bookworm-slim
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
-WORKDIR /app
-COPY --from=builder /app/target/release/jol /app/server
-EXPOSE 8080
-CMD ["/app/server"]
-
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY main.py .
+CMD ["python", "main.py"]
