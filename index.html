@@ -51,44 +51,44 @@
 
   header { text-align: center; padding: 4px 0 10px; }
 
-  /* рамка логотипа: видна всегда, картинка лежит внутри */
+  /* Рамка логотипа — крупнее и заметнее */
   .logo-frame {
     display: none;
     margin: 0 auto;
-    padding: 6px;
+    padding: 8px;
     width: fit-content;
     border: 1px solid var(--green-dim);
-    border-radius: 10px;
-    background: rgba(0, 12, 4, 0.55);
-    box-shadow: 0 0 22px rgba(0, 255, 65, 0.35);
+    border-radius: 12px;
+    background: rgba(0, 12, 4, 0.6);
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.45);
     animation: pulse 4s ease-in-out infinite;
   }
   .logo-frame img {
     display: block;
-    max-width: 190px;
-    max-height: 90px;
+    max-width: 240px;       /* Увеличили размер */
+    max-height: 110px;
     width: auto;
     height: auto;
-    border-radius: 6px;
+    border-radius: 8px;
   }
   @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 14px rgba(0, 255, 65, 0.25); }
-    50%      { box-shadow: 0 0 30px rgba(0, 255, 65, 0.55); }
+    0%, 100% { box-shadow: 0 0 18px rgba(0, 255, 65, 0.3); }
+    50%      { box-shadow: 0 0 40px rgba(0, 255, 65, 0.65); }
   }
 
-  /* текстовый логотип — включается, если картинка не загрузилась */
+  /* Текстовый логотип как запасной вариант */
   .logo-text {
     display: none;
-    font-size: 30px;
-    letter-spacing: 8px;
+    font-size: 34px;
+    letter-spacing: 10px;
     color: #d6ffe2;
-    text-shadow: 0 0 10px rgba(0, 255, 65, 0.7);
+    text-shadow: 0 0 12px rgba(0, 255, 65, 0.8);
   }
   .logo-text.active, .logo-frame.active { display: block; }
 
   .subtitle {
-    margin-top: 6px;
-    font-size: 12px;
+    margin-top: 8px;
+    font-size: 13px;
     color: var(--green-dim);
     letter-spacing: 2px;
     animation: glitch 3.5s infinite;
@@ -173,7 +173,7 @@
       <img id="logoImg" src="logo.png" alt="JOL">
     </div>
     <div class="logo-text" id="logoText">J O L</div>
-    <div class="subtitle">// wake up, wanderer...</div>
+    <div class="subtitle">// system ready</div>   <!-- Было wake up wanderer, теперь system ready -->
   </header>
 
   <div id="chat">
@@ -229,7 +229,7 @@ function draw() {
 }
 setInterval(draw, 55);
 
-// ===== логотип: пробуем варианты имени файла, при неудаче — текст =====
+// ===== логика логотипа: картинка или текст =====
 const logoVariants = ["logo.png", "logo.jpg", "logo.jpeg"];
 const logoFrame = document.getElementById("logoFrame");
 const logoText = document.getElementById("logoText");
@@ -238,7 +238,7 @@ let logoIndex = 0;
 function tryLogo() {
   if (logoIndex >= logoVariants.length) {
     logoFrame.classList.remove("active");
-    logoText.classList.add("active"); // картинка не найдена — показываем текст J O L
+    logoText.classList.add("active");
     return;
   }
   document.getElementById("logoImg").src = logoVariants[logoIndex];
