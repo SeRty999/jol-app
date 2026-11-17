@@ -9,3 +9,4 @@ WORKDIR /app
 COPY --from=builder /app/target/release/jol /app/server
 EXPOSE 8080
 CMD ["/app/server"]
+
