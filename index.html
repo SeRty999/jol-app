@@ -51,19 +51,37 @@
     padding: 12px;
   }
 
-  /* ---------- шапка ---------- */
-  header { text-align: center; padding: 8px 0 12px; }
-  .logo {
-    font-size: 26px;
-    letter-spacing: 6px;
-    color: #d6ffe2;
-    animation: glitch 3.5s infinite;
+  /* ---------- шапка с логотипом ---------- */
+  header { text-align: center; padding: 4px 0 10px; }
+
+  .logo-frame {
+    display: inline-block;
+    padding: 6px;
+    border: 1px solid var(--green-dim);
+    border-radius: 10px;
+    background: rgba(0, 12, 4, 0.55);
+    box-shadow: 0 0 22px rgba(0, 255, 65, 0.35);
+    animation: pulse 4s ease-in-out infinite;
   }
+  .jol-logo {
+    display: block;
+    max-width: 190px;
+    max-height: 90px;
+    width: auto;
+    height: auto;
+    border-radius: 6px;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 14px rgba(0, 255, 65, 0.25); }
+    50%      { box-shadow: 0 0 30px rgba(0, 255, 65, 0.55); }
+  }
+
   .subtitle {
-    margin-top: 4px;
+    margin-top: 6px;
     font-size: 12px;
     color: var(--green-dim);
     letter-spacing: 2px;
+    animation: glitch 3.5s infinite;
   }
   @keyframes glitch {
     0%, 93%, 100% { transform: none; text-shadow: 0 0 8px rgba(0,255,65,.6); }
@@ -135,7 +153,6 @@
     box-shadow: 0 0 14px rgba(0, 255, 65, 0.6);
   }
 
-  /* ---------- приветственная строка с эффектом печатания ---------- */
   .boot { font-size: 12px; color: var(--green-dim); margin-bottom: 10px; }
 </style>
 </head>
@@ -144,7 +161,9 @@
 
 <div class="app">
   <header>
-    <div class="logo">J O L</div>
+    <div class="logo-frame">
+      <img src="logo.png" alt="JOL" class="jol-logo">
+    </div>
     <div class="subtitle">// wake up, neo...</div>
   </header>
 
@@ -173,11 +192,10 @@ window.addEventListener("resize", resize);
 
 const glyphs = "アカサタナハマヤラワ0123456789$#*+=";
 const fontSize = 16;
-let columns = canvas.width / fontSize;
 let drops = [];
 
 function initDrops() {
-  columns = Math.floor(canvas.width / fontSize);
+  const columns = Math.floor(canvas.width / fontSize);
   drops = Array.from({ length: columns }, () =>
     Math.floor(Math.random() * (canvas.height / fontSize))
   );
@@ -191,7 +209,6 @@ function draw() {
 
   for (let i = 0; i < drops.length; i++) {
     const char = glyphs[Math.floor(Math.random() * glyphs.length)];
-    // первая капля — яркая, хвост — тусклый
     ctx.fillStyle = Math.random() > 0.975 ? "#d6ffe2" : "#00b32d";
     ctx.fillText(char, i * fontSize, drops[i] * fontSize);
 
@@ -245,8 +262,7 @@ document.getElementById("form").addEventListener("submit", function (e) {
   addMsg("you", "USER >_> " + new Date().toLocaleTimeString(), value);
   input.value = "";
 
-  // ЗАГЛУШКА: пока отвечает локальный «оракул».
-  // Позже здесь будет fetch к твоему Rust-боту.
+  // ЗАГЛУШКА: позже здесь будет fetch к твоему Rust-боту.
   setTimeout(() => {
     addMsg("bot", "JOL >>> " + new Date().toLocaleTimeString(),
       "Демо-режим. Подключение к боту будет добавлено следующим шагом. Ваш запрос принят: \"" + value + "\"");
