@@ -19,7 +19,6 @@
     overflow: hidden;
   }
 
-  /* ---------- дожд из кода ---------- */
   #matrix {
     position: fixed;
     inset: 0;
@@ -27,7 +26,6 @@
     opacity: 0.35;
   }
 
-  /* ---------- сканлайны как на старом мониторе ---------- */
   body::after {
     content: "";
     position: fixed;
@@ -51,19 +49,21 @@
     padding: 12px;
   }
 
-  /* ---------- шапка с логотипом ---------- */
   header { text-align: center; padding: 4px 0 10px; }
 
+  /* рамка логотипа: видна всегда, картинка лежит внутри */
   .logo-frame {
-    display: inline-block;
+    display: none;
+    margin: 0 auto;
     padding: 6px;
+    width: fit-content;
     border: 1px solid var(--green-dim);
     border-radius: 10px;
     background: rgba(0, 12, 4, 0.55);
     box-shadow: 0 0 22px rgba(0, 255, 65, 0.35);
     animation: pulse 4s ease-in-out infinite;
   }
-  .jol-logo {
+  .logo-frame img {
     display: block;
     max-width: 190px;
     max-height: 90px;
@@ -75,6 +75,16 @@
     0%, 100% { box-shadow: 0 0 14px rgba(0, 255, 65, 0.25); }
     50%      { box-shadow: 0 0 30px rgba(0, 255, 65, 0.55); }
   }
+
+  /* текстовый логотип — включается, если картинка не загрузилась */
+  .logo-text {
+    display: none;
+    font-size: 30px;
+    letter-spacing: 8px;
+    color: #d6ffe2;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.7);
+  }
+  .logo-text.active, .logo-frame.active { display: block; }
 
   .subtitle {
     margin-top: 6px;
@@ -91,7 +101,6 @@
     97% { transform: none; }
   }
 
-  /* ---------- окно сообщений ---------- */
   #chat {
     flex: 1;
     overflow-y: auto;
@@ -117,7 +126,6 @@
   }
   @keyframes blink { 50% { opacity: 0; } }
 
-  /* ---------- ввод ---------- */
   form { display: flex; gap: 8px; margin-top: 10px; }
   .prompt { color: var(--green); font-weight: bold; align-self: center; }
   #input {
@@ -161,10 +169,11 @@
 
 <div class="app">
   <header>
-    <div class="logo-frame">
-      <img src="logo.png" alt="JOL" class="jol-logo">
+    <div class="logo-frame" id="logoFrame">
+      <img id="logoImg" src="logo.png" alt="JOL">
     </div>
-    <div class="subtitle">// wake up, neo...</div>
+    <div class="logo-text" id="logoText">J O L</div>
+    <div class="subtitle">// wake up, wanderer...</div>
   </header>
 
   <div id="chat">
@@ -220,6 +229,32 @@ function draw() {
 }
 setInterval(draw, 55);
 
+// ===== логотип: пробуем варианты имени файла, при неудаче — текст =====
+const logoVariants = ["logo.png", "logo.jpg", "logo.jpeg"];
+const logoFrame = document.getElementById("logoFrame");
+const logoText = document.getElementById("logoText");
+let logoIndex = 0;
+
+function tryLogo() {
+  if (logoIndex >= logoVariants.length) {
+    logoFrame.classList.remove("active");
+    logoText.classList.add("active"); // картинка не найдена — показываем текст J O L
+    return;
+  }
+  document.getElementById("logoImg").src = logoVariants[logoIndex];
+}
+
+const logoImg = document.getElementById("logoImg");
+logoImg.onload = () => {
+  logoFrame.classList.add("active");
+  logoText.classList.remove("active");
+};
+logoImg.onerror = () => {
+  logoIndex++;
+  tryLogo();
+};
+tryLogo();
+
 // ===== печатание текста =====
 function typeText(el, text, speed, done) {
   let i = 0;
@@ -231,10 +266,10 @@ function typeText(el, text, speed, done) {
   })();
 }
 
-// ===== приветствие при загрузке =====
+// ===== приветствие =====
 const chat = document.getElementById("chat");
 const bootline = document.getElementById("bootline");
-const bootMsg = "> Connection established. Access granted. Ask anything, Neo.";
+const bootMsg = "> Connection established. Access granted. Ask anything, wanderer.";
 
 typeText(bootline, bootMsg, 30);
 
@@ -253,6 +288,27 @@ function addMsg(cls, who, text) {
 }
 
 // ===== отправка =====
+const API_URL = "http://localhost:3000/chat"; // <-- адрес твоего Rust-бота
+
+async function sendRequest(userText) {
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userText })
+    });
+    if (!response.ok) {
+      throw new Error("Ошибка сервера: " + response.status);
+    }
+    const data = await response.json();
+    const botReply = data.reply || "Нет ответа от бота.";
+    addMsg("bot", "JOL >>> " + new Date().toLocaleTimeString(), botReply);
+  } catch (err) {
+    addMsg("bot", "JOL >>> " + new Date().toLocaleTimeString(),
+      "Демо-режим: сервер недоступен. Ваш запрос принят: \"" + userText + "\"");
+  }
+}
+
 document.getElementById("form").addEventListener("submit", function (e) {
   e.preventDefault();
   const input = document.getElementById("input");
@@ -262,11 +318,7 @@ document.getElementById("form").addEventListener("submit", function (e) {
   addMsg("you", "USER >_> " + new Date().toLocaleTimeString(), value);
   input.value = "";
 
-  // ЗАГЛУШКА: позже здесь будет fetch к твоему Rust-боту.
-  setTimeout(() => {
-    addMsg("bot", "JOL >>> " + new Date().toLocaleTimeString(),
-      "Демо-режим. Подключение к боту будет добавлено следующим шагом. Ваш запрос принят: \"" + value + "\"");
-  }, 600);
+  sendRequest(value);
 });
 </script>
 </body>
