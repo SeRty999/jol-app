@@ -1,4 +1,13 @@
-app = "jol-bot"
+# fly.toml app configuration file generated for jol-bot on 2026-11-17T14:23:07Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'jol-bot'
+primary_region = 'ams'
 
 [build]
-  dockerfile = "Dockerfile"
+
+[[vm]]
+  memory = '1gb'
+  cpus = 1
